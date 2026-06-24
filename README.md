@@ -2,7 +2,7 @@
 
 This repository contains codes and dataset related to the Master’s thesis:
 
-**“The Meaning of Tautologies: An Experimental Study of their Pragmatic Interpretation" (Quadros, Luiz. 2026)
+**“The Meaning of Tautologies: An Experimental Study of their Pragmatic Interpretation"** (Quadros, Luiz. 2026)
 
 ## Project Overview
 
