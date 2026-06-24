@@ -19,7 +19,7 @@ to examine how structure influences interpretation across different categories:
 
 ## Files included in the repository
 
-## Datasets
+### Datasets
 
 All data was collected using Google Forms and processed in R.
 The datasets included here correspond to:
@@ -27,7 +27,7 @@ The datasets included here correspond to:
 - version_A_original: Raw answers from google-forms-exported version dataset containing 20 responses.
 - version_B_original: Raw answers from google-forms-exported version dataset containing 19 responses.
 
-## Code
+### Code
 
 The analysis was conducted using **R**, including:
 
@@ -35,12 +35,12 @@ The analysis was conducted using **R**, including:
 - TFM_main_analysis: Script with the analysis, calculation of mean ratings.
 
 
-## 👤 Author
+## Author
 
 Luiz Otavio De Quadros  
 Universitat Pompeu Fabra — Barcelona  
 
-## 📄 License
+## License
 
 This project is shared for academic and research purposes.
 
