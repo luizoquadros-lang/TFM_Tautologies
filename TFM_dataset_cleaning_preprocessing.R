@@ -5,7 +5,6 @@
 
 # =========================================================
 # 1. LOAD LIBRARIES
-# =========================================================
 library(dplyr)
 library(tidyr)
 library(stringr)
@@ -13,8 +12,6 @@ library(readr)
 
 # =========================================================
 # 2. LOAD DATA
-# Load the raw data files for both experimental versions
-# =========================================================
 A <- read_csv("Version_A_original.csv")
 B <- read_csv("Version_B_original.csv")
 
@@ -22,28 +19,24 @@ B <- read_csv("Version_B_original.csv")
 # 3. STANDARDIZE DATA TYPES
 # Convert all fields to character to avoid type mismatch issues
 # when merging datasets with slightly different formats
-# =========================================================
 A <- A %>% mutate(across(everything(), as.character))
 B <- B %>% mutate(across(everything(), as.character))
 
 # =========================================================
 # 4. MERGE DATASETS
 # Combine both datasets into a single dataframe
-# =========================================================
 wide <- bind_rows(A, B)
 
 # =========================================================
 # 5. ADD VERSION LABEL
 # Create a variable indicating the source version (A or B)
-# =========================================================
 wide$VERSION <- c(rep("A", nrow(A)), rep("B", nrow(B)))
 
 # =========================================================
 # 6. CLEAN VARIABLES
 # Standardize key demographic and metadata variables
-# =========================================================
 
-# Detect the frequency column dynamically (robust approach)
+# Detect the frequency column dynamically
 freq_col <- names(wide)[str_detect(names(wide), regex("frequency|often", ignore_case = TRUE))][1]
 
 # Extract frequency values
@@ -82,7 +75,6 @@ wide <- wide %>%
 # 7. CREATE PARTICIPANT IDENTIFIERS
 # V_ID: participant ID within each version
 # ID: global sequential ID across full dataset
-# =========================================================
 wide <- wide %>%
   group_by(VERSION) %>%
   mutate(
@@ -96,31 +88,26 @@ wide <- wide %>%
 # =========================================================
 # 8. DETECT START OF RESPONSE COLUMNS
 # Identify where questionnaire response data begins
-# This is necessary for correctly mapping ratings
-# =========================================================
 start_col <- which(str_detect(names(wide), regex("1", ignore_case = TRUE)))[1]
 
 # =========================================================
 # 9. EXPERIMENTAL MAPPING
 # Defines the structure of the experiment:
-# - Question number
-# - Dialogue mapping
-# - Category
-# - Condition per version
+
 # =========================================================
 map <- data.frame(
-  QUESTION = 1:16,
-  DIALOG = c(13,1,4,6,9,14,11,3,8,15,7,10,16,12,2,5),
-  CAT = c(0,1,1,2,3,0,3,1,2,0,2,3,0,3,1,2),
-  A_COND = c("F","T","NT","NT","T","F","T","T","NT","F","T","NT","F","NT","NT","T"),
-  B_COND = c("F","NT","T","T","NT","F","NT","NT","T","F","NT","T","F","T","T","NT")
+  QUESTION = 1:16, # Question number
+  DIALOG = c(13,1,4,6,9,14,11,3,8,15,7,10,16,12,2,5), # Dialogue mapping
+  CAT = c(0,1,1,2,3,0,3,1,2,0,2,3,0,3,1,2), # Category
+  A_COND = c("F","T","NT","NT","T","F","T","T","NT","F","T","NT","F","NT","NT","T"), # Condition per version A
+  B_COND = c("F","NT","T","T","NT","F","NT","NT","T","F","NT","T","F","T","T","NT") # Condition per version B
 )
 
 # =========================================================
 # 10. BUILD LONG FORMAT DATASET
 # Convert wide-format responses into long-format observations
 # Each row represents one rating or response
-# =========================================================
+
 rows <- list()
 
 for (i in 1:nrow(wide)) {
@@ -173,7 +160,6 @@ long <- bind_rows(rows)
 # =========================================================
 # 11. FINAL CLEANING
 # Ensure consistency across all variables
-# =========================================================
 long <- long %>%
   mutate(
     # Replace missing ratings with 0
@@ -188,7 +174,6 @@ long <- long %>%
 # =========================================================
 # 12. ORDER COLUMNS
 # Arrange variables in a consistent and interpretable order
-# =========================================================
 long <- long %>%
   select(
     ID, V_ID, VERSION, AGE, GENDER, EDUC, FREQ,
@@ -198,14 +183,12 @@ long <- long %>%
 # =========================================================
 # 13. SORT DATA
 # Ensure systematic ordering of rows
-# =========================================================
 long <- long %>%
   arrange(ID, QUESTION, DIMEN)
 
 # =========================================================
 # 14. QUALITY CHECKS
 # Simple checks to validate structure and data integrity
-# =========================================================
 
 print(paste("Total rows:", nrow(long)))
 
@@ -222,9 +205,6 @@ stopifnot(ncol(long) == 14)
 # =========================================================
 # 15. SAVE FINAL DATASET
 # Export dataset for analysis
-# =========================================================
-write_csv2(long, "dataset_TFM_final_clean.csv")
+write_csv2(long, "dataset_TFM_final.csv")
 
-# =========================================================
-# DONE
-# =========================================================
+
