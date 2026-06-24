@@ -1,51 +1,74 @@
-#TFM main analysis
+# Author: Luiz Otavio de Quadros
+# Project: TFM — Main analysis
+# Description: Computes mean ratings by dimension, category and condition.
+# Results correspond to Section 5.2 (Results by dimension).
 
-#Load the dataset
-dataset <- read.csv("dataset_TFM_final.csv")
-
-#=================================
-#this is the code for the 5.2 Results by dimension 
-#=================================
-
+# =========================================================
+# 1. LOAD LIBRARIES
 library(dplyr)
 library(tidyr)
 library(purrr)
 
-# Define the dimensions to analyze (1–8)
+# =========================================================
+# 2. LOAD DATASET
+dataset <- read.csv("dataset_TFM_final.csv")
+
+# =========================================================
+# 3. DEFINE DIMENSIONS. 1–8 correspond to rating scales
 dimensions <- 1:8
 
-# Function to compute means for a given dimension
+# =========================================================
+# 4. FUNCTION: Compute mean ratings for each dimension:
 compute_means <- function(d) {
   
-  # Step 1: Mean by category and condition
-  mean_by_cat_cond <- dataset %>%
-    filter(DIMEN == d, CAT != 0) %>%
-    group_by(DIMEN, CAT, COND) %>%
-    summarise(mean_rating = mean(RATING), .groups = "drop")
+  # Filter relevant data (exclude CAT = 0)
+  data_dim <- dataset %>%
+    filter(DIMEN == d, CAT != 0)
   
-  # Step 2: Overall mean by category
-  mean_overall <- dataset %>%
-    filter(DIMEN == d, CAT != 0) %>%
-    group_by(DIMEN, CAT) %>%
-    summarise(mean_rating = mean(RATING), .groups = "drop") %>%
+  # Mean by category and condition
+  mean_by_cat_cond <- data_dim %>%
+    group_by(CAT, COND) %>%
+    summarise(
+      mean_rating = mean(RATING),
+      .groups = "drop"
+    )
+  
+  # Overall mean by category
+  mean_overall <- data_dim %>%
+    group_by(CAT) %>%
+    summarise(
+      mean_rating = mean(RATING),
+      .groups = "drop"
+    ) %>%
     mutate(COND = "Overall")
   
-  # Step 3: Combine
-  means_combined <- bind_rows(mean_by_cat_cond, mean_overall)
+  # Combine both results
+  means_combined <- bind_rows(mean_by_cat_cond, mean_overall) %>%
+    mutate(DIMEN = d)
   
-  # Step 4: Pivot to wide format
+  # Convert to wide format
   final_table <- means_combined %>%
-    pivot_wider(names_from = COND, values_from = mean_rating)
+    pivot_wider(
+      names_from = COND,
+      values_from = mean_rating
+    ) %>%
+    arrange(CAT)
   
   return(final_table)
 }
 
-# Apply function to all dimensions and combine results
+# =========================================================
+# 5. APPLY FUNCTION TO ALL DIMENSIONS
 all_mean_results <- map_dfr(dimensions, compute_means)
 
-# Display final table
-print(n=24, all_mean_results)
-write.csv2(all_mean_results, "all_mean_results.csv", row.names = FALSE)
+# =========================================================
+# 6. ORDER FINAL OUTPUT
+all_mean_results <- all_mean_results %>%
+  select(DIMEN, CAT, everything()) %>%
+  arrange(DIMEN, CAT)
 
+# =========================================================
+# 7. DISPLAY RESULTS
+print(all_mean_results, n = 24)
 
-
+# DONE
